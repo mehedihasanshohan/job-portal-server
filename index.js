@@ -6,7 +6,7 @@ const express = require('express');
 const cors = require('cors');
 // port from .env
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // express app
 const app = express();
@@ -35,7 +35,7 @@ async function run() {
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
-    //job related items
+    //job related apis
     const jobsCollections = client.db('jobPortal').collection('jobs');
 
     app.get('/jobs', async(req,res) =>{
@@ -43,6 +43,14 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     })
+
+    // Dynamic route to get single job details by ID
+    app.get('/jobs/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await jobsCollections.findOne(query);
+      res.send(result);
+    });
 
 
 
